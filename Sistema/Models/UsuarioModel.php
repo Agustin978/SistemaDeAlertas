@@ -4,14 +4,17 @@ class Usuario
 {
     private $id;
     private $nombre;
-    private $password;
+    private $passwordhash;
+    private $email;
     private $temasDeInteres = [];
     private $alertasRecibidas = [];
 
-    public function __construct($id, $nombre)
+    public function __construct($id, $nombre, $email, $password)
     {
         $this->id = $id;
-        $this ->nombre = $nombre;
+        $this->nombre = $nombre;
+        $this->email = $email;
+        $this->passwordhash = password_hash($password, PASSWORD_DEFAULT);
     }
 
     public function getID(){return $this->id;}
