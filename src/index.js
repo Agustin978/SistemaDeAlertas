@@ -23,5 +23,10 @@ sistema.enviarAlerta('Urgente', 'Servidor caido.', new Date(Date.now() + 1000 * 
 
 //Obtener alertas no leidas de un usuario
 console.log('Alertas no leidas de: ',usuario2.getNombre(),'\n', sistema.ObtenerAlertasNoLeidasDeUsuario(usuario2.id));
+console.log('\nAlertas no leidas de: ',usuario1.getNombre(),'\n', sistema.ObtenerAlertasNoLeidasDeUsuario(usuario1.id));
 //Obtener alertas no expiradas de un tema
 console.log('Alertas no expiradas de ',tema1.titulo,'\n',sistema.ObtenerAlertasNoExpiradasDeTema(tema1.titulo));
+
+//Envia alerta a un usuario
+sistema.enviarAlerta('Informativa', 'Algo extra.', new Date(Date.now() + 1000 * 60 * 60), tema3.id, usuario1.id);
+console.log('\nSe envia una alerta al usuario: ',usuario1.getNombre(),'\n',sistema.ObtenerAlertasNoLeidasDeUsuario(usuario1.id));
