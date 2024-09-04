@@ -2,9 +2,9 @@ class Tema
 {
     static #idCounter = 0;
     
-    constructor(nombre) {
+    constructor(titulo) {
         this.id = Tema.#idCounter++;
-        this.nombre = nombre;
+        this.titulo = titulo;
     }
 }
 
