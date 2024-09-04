@@ -27,22 +27,41 @@ class SistemaNotificaciones
 
     enviarAlerta(tipo, mensaje, fechaExpira, temaId, usuarioId = null)
     {
-        const tema = this.temas.find(tem => tem.id == temaId);
-        const alerta = new Alerta(tipo, mensaje, fechaExpira, usuarioId === null, usuarioId);
-        this.alertas.push(alerta);
-        if(usuarioId === null)
+        try
+        {
+            const tema = this.temas.find(tem => tem.id == temaId);
+            //Para el caso que se ingrese el id de un tema no registrado
+            if(!tema)
             {
-                this.usuarios.forEach(usuario =>{
-                    if(usuario.temasSuscrito.includes(tema))
+                console.error('Error: El tema con ID ',temaId,' no existe. No se puede crear la alerta.');
+            }
+            const alerta = new Alerta(tipo, mensaje, fechaExpira, usuarioId === null, usuarioId, temaId);
+            this.alertas.push(alerta);
+            if(usuarioId === null)
+                {
+                    this.usuarios.forEach(usuario =>{
+                        if(usuario.verificaSuscripcionATema(tema))
+                        {
+                            usuario.recibirAlerta(alerta);
+                        }
+                    });
+                }else
+                {
+                    const usuario = this.usuarios.find(user => user.id == usuarioId);
+                    //Para el caso en que el id del usuario no se encuentre registrado o el mismo no este suscripto al tema.
+                    if( usuario && usuario.verificaSuscripcionATema(tema))
                     {
                         usuario.recibirAlerta(alerta);
+                    }else
+                    {
+                        console.error('El usuario no se encuetra registrado o el mismo no esta suscripto al tema');
+                        return;
                     }
-                });
-            }else
-            {
-                const usuario = this.usuarios.find(user => user.id == usuarioId);
-                usuario.recibirAlerta(alerta);
-            }        
+                }        
+        }catch(error)
+        {
+            console.error(error);
+        }
     }
 
     ordenarAlertas(alertas)
