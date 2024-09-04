@@ -86,10 +86,11 @@ class SistemaNotificaciones
 
     ObtenerAlertasNoExpiradasDeTema(temaId)
     {
-        const alertasNoExpiradas = this.alertas.filter(alerta => 
-            alerta.temaId === temaId && 
+        const alertasNoExpiradas = this.alertas.filter(alerta =>  
             !alerta.estaExpirada() && 
-            alerta.paraTodos);
+            alerta.paraTodos &&
+            alerta.temaID === temaId
+        );
         return this.ordenarAlertas(alertasNoExpiradas);
     }
 }
