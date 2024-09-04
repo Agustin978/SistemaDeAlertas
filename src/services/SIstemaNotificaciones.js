@@ -58,6 +58,7 @@ class SistemaNotificaciones
                         return;
                     }
                 }        
+                return alerta;
         }catch(error)
         {
             console.error(error);
@@ -81,7 +82,14 @@ class SistemaNotificaciones
     ObtenerAlertasNoLeidasDeUsuario(usuarioId)
     {
         const usuario = this.usuarios.find(user => user.id === usuarioId);
-        return this.ordenarAlertas(usuario.obtenerAlertasNoLeidas());
+        if(usuario)
+        {
+            return this.ordenarAlertas(usuario.obtenerAlertasNoLeidas());
+        }else
+        {
+            console.error('El usuario no fue encontrado.');
+            return;
+        }
     }
 
     ObtenerAlertasNoExpiradasDeTema(temaId)
@@ -92,6 +100,39 @@ class SistemaNotificaciones
             alerta.temaID === temaId
         );
         return this.ordenarAlertas(alertasNoExpiradas);
+    }
+
+    marcarAlertaComoLeida(usuarioId, alertaId)
+    {
+        const usuario = this.usuarios.find(user => user.id === usuarioId);
+        if(usuario)
+        {
+            const alertaNoLeida = usuario.obtenerAlertasNoLeidas().find(al=>al.id ===alertaId);
+            if(alertaNoLeida)
+            {
+                usuario.alertaLeida(alertaNoLeida); //Muevo la alerta a alerta leida
+                console.log('La alerta ',alertaNoLeida.mensaje,' con id ',alertaNoLeida.id,' se marco como leida');
+            }else
+            {
+                console.error('La alerta no fue encontrada o ya fue leída.');
+            }
+        }else
+        {
+            console.error('El usuario no fue encontrado.');
+        }
+    }
+
+    ObtenerAlertasLeidasPorUsuario(usuarioId)
+    {
+        const usuario = this.usuarios.find(user => user.id === usuarioId);
+        if(usuario)
+        {
+            return this.ordenarAlertas(usuario.obtenerAlertasYaLeidas());
+        }else
+        {
+            console.error('El usuario no fue encontrado.');
+            return;
+        }
     }
 }
 module.exports = SistemaNotificaciones; 
