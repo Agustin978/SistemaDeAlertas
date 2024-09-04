@@ -40,6 +40,7 @@ class Usuario
         {
             this.alertasYaLeidas.push(alerta);
         }
+        alerta.marcaComoLeida(); //Cambia el estado de la alerta a 'leida'
     }
 
     obtenerAlertasNoLeidas()
