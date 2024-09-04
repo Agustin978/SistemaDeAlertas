@@ -11,6 +11,7 @@ class Usuario
         this.alertasNoLeidas = [];
     }
 
+    getNombre(){return this.nombre;}
     suscribeATema(tema){
         this.temasSuscrito.push(tema);
     }
