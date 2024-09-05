@@ -103,8 +103,16 @@ class SistemaNotificaciones
         }
     }
 
-    ordenarAlertas(alertas)
+    #ordenarAlertas(alertas)
     {
+        //Separamos las alertas urgentes de las informativas
+        let urgentes = alertas.filter(a => a.prioridad() == 2);
+        let informativas = alertas.filter(a => a.prioridad() != 2);
+        //Ordenamiento
+        urgentes.sort((a,b)=>b.id-a.id);
+        informativas.sort((a,b)=>a.id-b.id);
+        return [...urgentes, ...informativas];
+/*
         return alertas.sort((a,b) => {
             if(a.prioridad === 2 && b.prioridad !== 2){
                 return -1; //a es urgente sin embargo b no => a va antes
@@ -114,7 +122,7 @@ class SistemaNotificaciones
             }
             return b.id - a.id; //Para temas urgentes, se utiliza el orden LIFO (Last in, First out)
                                 //Para temas informativos, se utiliza el orden FIFO (Fist in, First out)
-        });
+        });*/
     }
     
     //Alertas no leidas del usuario y no expiradas.
@@ -125,7 +133,7 @@ class SistemaNotificaciones
             const usuario = this.#buscaUsuarioPorID(usuarioId);
             if(usuario)
             {
-                return this.ordenarAlertas(usuario.obtenerAlertasNoLeidas().filter(alerta => !alerta.estaExpirada()));
+                return this.#ordenarAlertas(usuario.obtenerAlertasNoLeidas().filter(alerta => !alerta.estaExpirada()));
             }else
             {
                 throw new Error('El usuario no fue encontrado.');
@@ -148,7 +156,7 @@ class SistemaNotificaciones
                     let alertasUsuario = usuario.buscarAlertasPorTema(temaId);
                     alertasNoExpiradas = [...alertasNoExpiradas, ...alertasUsuario];
                 });
-                return this.ordenarAlertas(alertasNoExpiradas);
+                return this.#ordenarAlertas(alertasNoExpiradas);
             }else
             {
                 throw new Error('El tema del que se estan buscando alertas no existe.')
@@ -198,7 +206,7 @@ class SistemaNotificaciones
             const usuario = this.#buscaUsuarioPorID(usuarioId);
             if(usuario)
             {
-                return this.ordenarAlertas(usuario.obtenerAlertasYaLeidas());
+                return this.#ordenarAlertas(usuario.obtenerAlertasYaLeidas());
             }else
             {
                 throw new Error('El usuario no fue encontrado.');
