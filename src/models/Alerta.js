@@ -2,12 +2,14 @@ class Alerta
 {
     static #idCounter = 1;
 
-    constructor(tipo, mensaje, fechaExpira, paraTodos = false, usuarioParticular = null, temaID)
+    constructor(mensaje, fechaExpira, paraTodos = false, usuarioParticular = null, temaID)
     {
         this.id = Alerta.#idCounter++;
         this.mensaje = mensaje;
         this.fechaExpira = fechaExpira;
         this.temaID = temaID;
+        this.paraTodos = paraTodos;
+        this.usuarioParticular = usuarioParticular;
         this.leida = false;
     }
 
