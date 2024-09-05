@@ -7,12 +7,12 @@ class Usuario
         this.id = Usuario.#idCounter++;
         this.nombre = nombre;
         this.password = password;
-        this.temasSuscrito = [];
         this.alertasNoLeidas = [];
         this.alertasYaLeidas = [];
     }
 
     getNombre(){return this.nombre;}
+    /*
     suscribeATema(tema){
         if(!this.temasSuscrito.includes(tema))
         {
@@ -26,7 +26,7 @@ class Usuario
     verificaSuscripcionATema(tema)
     {
         return this.temasSuscrito.includes(tema);
-    }
+    }*/
 
     recibirAlerta(alerta)
     {
@@ -53,9 +53,9 @@ class Usuario
         return this.alertasYaLeidas;
     }
 
-    obtenerTemasSuscriptos()
+    update(alerta)
     {
-        return this.temasSuscrito;
+        return this.recibirAlerta(alerta);
     }
 }
 
