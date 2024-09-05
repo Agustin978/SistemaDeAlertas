@@ -18,6 +18,7 @@ usuario1.suscribeATema(tema2);
 usuario1.suscribeATema(tema1);
 usuario2.suscribeATema(tema1);
 usuario2.suscribeATema(tema2);
+usuario2.suscribeATema(tema3);
 usuario3.suscribeATema(tema2);
 usuario3.suscribeATema(tema3);
 
@@ -31,6 +32,7 @@ const alerta1 = sistema.enviarAlerta('Informativa','I1',fechaExpira,tema1.id,usu
 //Alerta que se manda a todos los usuarios que se suscriban al tema
 const alerta2 = sistema.enviarAlerta('Urgente','U1',fechaExpira, tema2.id);
 const alerta3 = sistema.enviarAlerta('Informativa','I2',fechaExpirada,tema3.id);
+const alerta4 = sistema.enviarAlerta('Informativa','I1',fechaExpira,tema1.id); 
 
 //Obtener las alertas de los respectivos usuarios
 console.log('Alertas no leidas de usuario',usuario1.getNombre(),'\n',sistema.ObtenerAlertasNoLeidasDeUsuario(usuario1.id));
