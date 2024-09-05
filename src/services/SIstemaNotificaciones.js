@@ -79,12 +79,13 @@ class SistemaNotificaciones
         });
     }
     
+    //Alertas no leidas del usuario y no expiradas.
     ObtenerAlertasNoLeidasDeUsuario(usuarioId)
     {
         const usuario = this.usuarios.find(user => user.id === usuarioId);
         if(usuario)
         {
-            return this.ordenarAlertas(usuario.obtenerAlertasNoLeidas());
+            return this.ordenarAlertas(usuario.obtenerAlertasNoLeidas().filter(alerta => !alerta.estaExpirada()));
         }else
         {
             console.error('El usuario no fue encontrado.');
@@ -111,7 +112,7 @@ class SistemaNotificaciones
             if(alertaNoLeida)
             {
                 usuario.alertaLeida(alertaNoLeida); //Muevo la alerta a alerta leida
-                console.log('La alerta ',alertaNoLeida.mensaje,' con id ',alertaNoLeida.id,' se marco como leida');
+                console.log('La alerta ',alertaNoLeida.mensaje,' con id ',alertaNoLeida.id,' se marco como leida, para el ususario ',usuario.getNombre());
             }else
             {
                 console.error('La alerta no fue encontrada o ya fue leída.');
