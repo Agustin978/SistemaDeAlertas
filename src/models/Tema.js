@@ -15,12 +15,18 @@ class Tema
 
     suscribirUsuario(usuario)
     {
-        if(!this.observers.includes(usuario))
+        try
         {
-            this.observers.push(usuario);
-        }else
+            if(!this.observers.includes(usuario))
+            {
+                this.observers.push(usuario);
+            }else
+            {
+                throw new Error(`El usuario ${usuario.getNombre()} ya se encuentra suscripto al tema ${this.titulo}`);
+            }
+        }catch(error)
         {
-            throw new Error('El usuario ',usuario.getNombre(),' ya se encuentra suscripto al tema ',this.titulo);
+            console.log(error.message);
         }
     }
 
@@ -31,7 +37,7 @@ class Tema
 
     verificaUsuarioSuscrito(usuario)
     {
-        return this.observers.find(usuario);
+        return this.observers.includes(usuario);
     }
 }
 
