@@ -13,6 +13,8 @@ const tema2 = sistema.registrarTema('Noticia de ultima hora');
 const tema3 = sistema.registrarTema('Feriados en Argentina');
 
 //Suscripcion de usuario a tema
+/*
+Ya no se hace de esta manera
 usuario1.suscribeATema(tema1);
 usuario1.suscribeATema(tema2);
 usuario1.suscribeATema(tema1);
@@ -20,7 +22,9 @@ usuario2.suscribeATema(tema1);
 usuario2.suscribeATema(tema2);
 usuario2.suscribeATema(tema3);
 usuario3.suscribeATema(tema2);
-usuario3.suscribeATema(tema3);
+usuario3.suscribeATema(tema3);*/
+
+sistema.suscribeUsuarioEnTema(usuario1.id, tema1.id);
 
 
 //Declaracion de fechas
@@ -32,15 +36,15 @@ const alerta1 = sistema.enviarAlerta('Informativa','I1',fechaExpira,tema1.id,usu
 //Alerta que se manda a todos los usuarios que se suscriban al tema
 const alerta2 = sistema.enviarAlerta('Urgente','U1',fechaExpira, tema2.id);
 const alerta3 = sistema.enviarAlerta('Informativa','I2',fechaExpirada,tema3.id);
-const alerta4 = sistema.enviarAlerta('Informativa','I1',fechaExpira,tema1.id); 
+const alerta4 = sistema.enviarAlerta('Urgente','U1',fechaExpira,tema1.id); 
 
 //Obtener las alertas de los respectivos usuarios
 console.log('Alertas no leidas de usuario',usuario1.getNombre(),'\n',sistema.ObtenerAlertasNoLeidasDeUsuario(usuario1.id));
-console.log('Alertas no leidas de usuario',usuario2.getNombre(),'\n',sistema.ObtenerAlertasNoLeidasDeUsuario(usuario2.id));
-console.log('Alertas no leidas de usuario',usuario3.getNombre(),'\n',sistema.ObtenerAlertasNoLeidasDeUsuario(usuario3.id));
+//console.log('Alertas no leidas de usuario',usuario2.getNombre(),'\n',sistema.ObtenerAlertasNoLeidasDeUsuario(usuario2.id));
+//console.log('Alertas no leidas de usuario',usuario3.getNombre(),'\n',sistema.ObtenerAlertasNoLeidasDeUsuario(usuario3.id));
 
-console.log('Alertas no expiradas de tema ',tema2.titulo,'\n',sistema.ObtenerAlertasNoExpiradasDeTema(tema2.id));
-console.log('Alertas no expiradas de tema ',tema3.titulo,'\n',sistema.ObtenerAlertasNoExpiradasDeTema(tema3.id)); //No me muestra nada ya que la alerta esta expirada
+console.log('Alertas no expiradas de tema ',tema1.titulo,'\n',sistema.ObtenerAlertasNoExpiradasDeTema(tema1.id));
+//console.log('Alertas no expiradas de tema ',tema3.titulo,'\n',sistema.ObtenerAlertasNoExpiradasDeTema(tema3.id)); //No me muestra nada ya que la alerta esta expirada
 
 //Un usuario marca una alerta como leida
 sistema.marcarAlertaComoLeida(usuario1.id, alerta1.id); //Marca la alerta 1 como leida
