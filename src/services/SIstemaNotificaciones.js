@@ -8,7 +8,6 @@ class SistemaNotificaciones
     {
         this.usuarios = [];
         this.temas = [];
-        this.alertas = [];
     }
 
     registrarUsuario(nombre, password)
@@ -33,32 +32,35 @@ class SistemaNotificaciones
             //Para el caso que se ingrese el id de un tema no registrado
             if(!tema)
             {
-                console.error('Error: El tema con ID ',temaId,' no existe. No se puede crear la alerta.');
+                throw new Error('Error: El tema con ID ',temaId,' no existe. No se puede crear la alerta.');
             }
-            const alerta = new Alerta(tipo, mensaje, fechaExpira, usuarioId === null, usuarioId, temaId);
-            this.alertas.push(alerta);
+            //const alerta = new Alerta(tipo, mensaje, fechaExpira, usuarioId === null, usuarioId, temaId);
+            //Se crea el tema segun el nivel de importancia
+            let alerta;
+            if(tipo === 'Urgente')
+            {
+                alerta = new Alerta.AlertaUrgente(mensaje, fechaExpira, temaId);
+            }else
+            {
+                alerta = new Alerta.AlertaInformativa(mensaje, fechaExpira, temaId);
+            }
+
             if(usuarioId === null)
+            {
+                tema.notificar(alerta);
+            }else
+            {
+                const usuario = this.usuarios.find(user => user.id == usuarioId);
+                //Para el caso en que el id del usuario no se encuentre registrado o el mismo no este suscripto al tema.
+                if( usuario && tema.verificaUsuarioSuscrito(usuario))
                 {
-                    this.usuarios.forEach(usuario =>{
-                        if(usuario.verificaSuscripcionATema(tema))
-                        {
-                            usuario.recibirAlerta(alerta);
-                        }
-                    });
+                    usuario.recibirAlerta(alerta);
                 }else
                 {
-                    const usuario = this.usuarios.find(user => user.id == usuarioId);
-                    //Para el caso en que el id del usuario no se encuentre registrado o el mismo no este suscripto al tema.
-                    if( usuario && usuario.verificaSuscripcionATema(tema))
-                    {
-                        usuario.recibirAlerta(alerta);
-                    }else
-                    {
-                        console.error('El usuario no se encuetra registrado o el mismo no esta suscripto al tema');
-                        return;
-                    }
-                }        
-                return alerta;
+                    throw new Error('El usuario no se encuetra registrado o el mismo no esta suscripto al tema ',tema.obtenerTitulo());
+                }
+            }        
+            return alerta;
         }catch(error)
         {
             console.error(error);
