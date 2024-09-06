@@ -1,3 +1,4 @@
+const { Alerta, AlertaUrgente, AlertaInformativa } = require("../models/Alerta");
 const Tema = require("../models/Tema");
 const Usuario = require("../models/Usuario");
 const SistemaNotificaciones = require("../services/SIstemaNotificaciones");
@@ -53,7 +54,7 @@ describe('SistemaNotificaciones - Registro de Tema', ()=>{
     });
 });
 
-describe('SIstemaNotificaciones - Suscribir un usuario en un tema', () => {
+describe('SistemaNotificaciones - Suscribir un usuario en un tema', () => {
     let sistema;
     beforeEach(() => {
         sistema = new SistemaNotificaciones();
@@ -96,4 +97,78 @@ describe('SIstemaNotificaciones - Suscribir un usuario en un tema', () => {
         const respuesta = sistema.suscribeUsuarioEnTema(999, tema.id);
         expect(respuesta).toBeUndefined(); //No se espera un valor ya que el usuario no existe.
     });
+});
+
+describe('SistemaNotificaciones - Enviar alerta a uno o a todos los usuarios suscriptos en un tema',() => {
+    let sistema;
+    beforeEach(() => {
+        sistema = new SistemaNotificaciones();
+    });
+
+    test('Deberia enviar una alerta a un unico usuario suscrito a un tema correctamente.', () => {
+        const usuario = sistema.registrarUsuario('Agustin', '1234');
+        const tema = sistema.registrarTema('Titulo tema');
+        const fechaExpira = new Date(Date.now() + 1000 * 60 * 60);
+        sistema.suscribeUsuarioEnTema(usuario.id, tema.id);
+        const respuesta = sistema.enviarAlerta('Urgente', 'U1', fechaExpira, tema.id, usuario.id);
+
+        //Verificamos que la alerta se haya creado
+        expect(respuesta).toBeInstanceOf(Alerta);
+        //Verifico que el id del tema de la alerta coincida con el id del tema enviado
+        expect(respuesta.temaID).toBe(tema.id);
+        //Verificamos que la alerta sea solo para un usuario
+        expect(respuesta.usuarioParticular).toBe(usuario.id);
+        //Verificamos que el usuario contenga la alerta
+        expect(usuario.alertasNoLeidas).toContain(respuesta);
+    });
+
+    test('Deberia enviar la alerta a todos los usuarios suscriptos al tema',() => {
+        const usuario1 = sistema.registrarUsuario('Usuario1', '1234');
+        const usuario2 = sistema.registrarUsuario('Usuario2', '1234');
+        const tema = sistema.registrarTema('Titulo tema');
+        const fechaExpira = new Date(Date.now() + 1000 * 60 * 60);
+        sistema.suscribeUsuarioEnTema(usuario1.id, tema.id);
+        sistema.suscribeUsuarioEnTema(usuario2.id, tema.id);
+
+        //Envio la alerta sin id de usuario para que la reciban todos los usuarios suscriptos al tema
+        const respuesta = sistema.enviarAlerta('Urgente', 'U1', fechaExpira, tema.id);
+        //Verifico la creacion de la alerta
+        expect(respuesta).toBeInstanceOf(Alerta);
+        //Verifico que el id del tema de la alerta coincida con el id del tema enviado
+        expect(respuesta.temaID).toBe(tema.id);
+        //Verifico que la alerta este marcada para todos los usuarios
+        expect(respuesta.usuarioParticular).toBe(null);
+        expect(respuesta.paraTodos).toBe(true);
+        //Verifico que la alerta se encuentre en ambos usuarios
+        expect(usuario1.alertasNoLeidas).toContain(respuesta);
+        expect(usuario2.alertasNoLeidas).toContain(respuesta);
+    });
+
+    test('Debe manejar correctamente el caso de la creacion de una alerta para un usuario que no esta suscripto en un tema.',() => {
+        const usuario = sistema.registrarUsuario('Usuario1', '1234');
+        const tema = sistema.registrarTema('Titulo tema');
+        const fechaExpira = new Date(Date.now() + 1000 * 60 * 60);
+        const respuesta = sistema.enviarAlerta('Urgente', 'U1', fechaExpira, tema.id, usuario.id);
+        
+        //Verifico que el usuario no esta suscripto al tema
+        expect(tema.observers).not.toContain(usuario);
+        expect(respuesta).toBeUndefined(); //No se espera un valor ya que el usuario no esta suscripto al tema
+        expect(usuario.alertasNoLeidas.length).toBe(0) //Como no se creo la alerta no se deberia haber ingresado nada
+    });
+
+    test('Debe manejar correctamente el caso de la creacion de una alerta para un usuario inexistente.', () => {
+        const tema = sistema.registrarTema('Titulo tema');
+        const fechaExpira = new Date(Date.now() + 1000 * 60 * 60);
+        const respuesta = sistema.enviarAlerta('Urgente', 'U1', fechaExpira, tema.id, 999); //Envio el id de un usuario que no existe
+
+        expect(respuesta).toBeUndefined(); //No se espera un valor ya que el usuario no existe
+    });
+
+    test('Debe manejar correctamente el caso de la creacion de una alerta para un tema inexistente.', () => {
+        const fechaExpira = new Date(Date.now() + 1000 * 60 * 60);
+        const respuesta = sistema.enviarAlerta('Urgente', 'U1', fechaExpira, 999); //Se envia un alerta para el id de un tema que no existe
+
+        expect(respuesta).toBeUndefined(); //No se espera un valor ya que el tema no existe
+    });
+    
 });
