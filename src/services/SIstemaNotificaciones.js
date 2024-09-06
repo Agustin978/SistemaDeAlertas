@@ -67,13 +67,10 @@ class SistemaNotificaciones
         try
         {
             const tema = this.#buscaTemaPorId(temaId);
-            //Para el caso que se ingrese el id de un tema no registrado
             if(!tema)
             {
                 throw new Error(`Error: El tema con ID ${temaId} no existe. No se puede crear la alerta.`);
             }
-            //const alerta = new Alerta(tipo, mensaje, fechaExpira, usuarioId === null, usuarioId, temaId);
-            //Se crea el tema segun el nivel de importancia
             let alerta;
             if(tipo === 'Urgente')
             {
@@ -89,7 +86,6 @@ class SistemaNotificaciones
             }else
             {
                 const usuario = this.#buscaUsuarioPorID(usuarioId);
-                //Para el caso en que el id del usuario no se encuentre registrado o el mismo no este suscripto al tema.
                 if( usuario && tema.verificaUsuarioSuscrito(usuario))
                 {
                     usuario.update(alerta);
@@ -107,27 +103,13 @@ class SistemaNotificaciones
 
     #ordenarAlertas(alertas)
     {
-        //Separamos las alertas urgentes de las informativas
         let urgentes = alertas.filter(a => a.prioridad() == 2);
         let informativas = alertas.filter(a => a.prioridad() != 2);
-        //Ordenamiento
         urgentes.sort((a,b)=>b.id-a.id);
         informativas.sort((a,b)=>a.id-b.id);
         return [...urgentes, ...informativas];
-/*
-        return alertas.sort((a,b) => {
-            if(a.prioridad === 2 && b.prioridad !== 2){
-                return -1; //a es urgente sin embargo b no => a va antes
-            }else if(a.prioridad !== 2 && b.prioridad === 2)
-            {
-                return 1; //a no es urgente sin embargo b si => b va antes
-            }
-            return b.id - a.id; //Para temas urgentes, se utiliza el orden LIFO (Last in, First out)
-                                //Para temas informativos, se utiliza el orden FIFO (Fist in, First out)
-        });*/
     }
     
-    //Alertas no leidas del usuario y no expiradas.
     ObtenerAlertasNoLeidasDeUsuario(usuarioId)
     {
         try
@@ -167,12 +149,6 @@ class SistemaNotificaciones
         {
             console.log(error.message);
         }
-        /*
-        const alertasNoExpiradas = this.alertas.filter(alerta =>  
-            !alerta.estaExpirada() && 
-            alerta.paraTodos &&
-            alerta.temaID === temaId
-        );*/
     }
 
     marcarAlertaComoLeida(usuarioId, alertaId)
@@ -185,7 +161,7 @@ class SistemaNotificaciones
                 const alertaNoLeida = usuario.obtenerAlertasNoLeidas().find(al=>al.id===alertaId);
                 if(alertaNoLeida)
                 {
-                    usuario.alertaLeida(alertaNoLeida); //Muevo la alerta a alerta leida
+                    usuario.alertaLeida(alertaNoLeida);
                     console.log('La alerta ',alertaNoLeida.mensaje,' con id ',alertaNoLeida.id,' se marco como leida, para el ususario ',usuario.getNombre());
                 }else
                 {
