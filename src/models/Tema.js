@@ -5,7 +5,7 @@ class Tema
     constructor(titulo) {
         this.id = Tema.#idCounter++;
         this.titulo = titulo;
-        this.observers = []; //Aqui se almacenara la lista de usuarios suscritos al tema
+        this.observers = [];
     }
 
     obtenerTitulo()
