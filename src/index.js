@@ -19,6 +19,7 @@ const tema8 = sistema.registrarTema('T8');
 
 //Suscripcion de usuario a tema
 sistema.suscribeUsuarioEnTema(usuario1.id, tema1.id);
+/*
 sistema.suscribeUsuarioEnTema(usuario1.id, tema2.id);
 sistema.suscribeUsuarioEnTema(usuario1.id, tema3.id);
 sistema.suscribeUsuarioEnTema(usuario1.id, tema4.id);
@@ -31,6 +32,8 @@ sistema.suscribeUsuarioEnTema(usuario2.id, tema3.id);
 sistema.suscribeUsuarioEnTema(usuario2.id, tema5.id);
 sistema.suscribeUsuarioEnTema(usuario2.id, tema1.id);
 sistema.suscribeUsuarioEnTema(usuario3.id, tema1.id);
+*/
+sistema.suscribeUsuarioEnTema(usuario1.id, tema1.id);
 
 
 
