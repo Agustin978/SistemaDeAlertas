@@ -82,6 +82,18 @@ describe('SIstemaNotificaciones - Suscribir un usuario en un tema', () => {
     });
 
     test('Deberia manejar el error en caso que el tema no exista.',() => {
+        const usuario = sistema.registrarUsuario('Agustin', '1234');
         
-    })
-})
+        //Suscribo al usuario a un tema inexistente
+        const respuesta = sistema.suscribeUsuarioEnTema(usuario.id, 999);
+        expect(respuesta).toBeUndefined(); //No se espera un valor ya que el tema no existe.
+    });
+
+    test('Deberia manejar el error en caso que el usuario no existe.', () => {
+        const tema = sistema.registrarTema('Titulo tema');
+
+        //Intento suscribir un usuario inexistente en el tema
+        const respuesta = sistema.suscribeUsuarioEnTema(999, tema.id);
+        expect(respuesta).toBeUndefined(); //No se espera un valor ya que el usuario no existe.
+    });
+});
