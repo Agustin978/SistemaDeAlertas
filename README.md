@@ -47,4 +47,3 @@ FROM Clientes C INNER JOIN Ventas V USING(Id_cliente) WHERE V.Fecha >= DATEADD(Y
 GROUP BY C.ID, C.Nombre, C.Apellido
 HAVING SUM(V.Importe) > 100000
 ORDER BY Total_Compras DESC;
-```
