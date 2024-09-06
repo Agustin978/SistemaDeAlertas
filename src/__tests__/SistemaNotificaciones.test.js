@@ -171,4 +171,20 @@ describe('SistemaNotificaciones - Enviar alerta a uno o a todos los usuarios sus
         expect(respuesta).toBeUndefined(); //No se espera un valor ya que el tema no existe
     });
     
+    test('Un usuario inscripto en un tema no debe recibir mas de una alerta del mismo tema', () => {
+        const usuario = sistema.registrarUsuario('Usuario1', '1234');
+        const tema = sistema.registrarTema('Titulo tema');
+        sistema.suscribeUsuarioEnTema(usuario.id, tema.id);
+        const fechaExpira = new Date(Date.now() + 1000 * 60 * 60);
+        const alerta1 = sistema.enviarAlerta('Informativa', 'I1', fechaExpira, tema.id, usuario.id); //Envia una alerta particular para el usuario suscrito
+        const alerta2 = sistema.enviarAlerta('Informativa', 'I1', fechaExpira, tema.id); //Envia una alerta a todos los usuarios suscritos
+
+        //Verifico que ambas alertas se crean
+        expect(alerta1).toBeInstanceOf(Alerta);
+        expect(alerta2).toBeInstanceOf(Alerta);
+        //Verifico que el usuario solo se queda con una alerta
+        expect(usuario.alertasNoLeidas).toContain(alerta1);
+        expect(usuario.alertasNoLeidas).not.toContain(alerta2);
+    });
 });
+
