@@ -40,10 +40,13 @@ Escribir una consulta SQL que traiga todos los clientes que han comprado en tota
 - Clientes: ID, Nombre, Apellido
 - Ventas: Fecha, Sucursal, Numero_factura, Importe, Id_cliente
 <br>
-Consulta: 
-```sql 
+Consulta:
+
+```sql
 SELECT C.ID, C.Nombre, C.Apellido, SUM(V.Importe) AS Total_Compras
-FROM Clientes C INNER JOIN Ventas V USING(Id_cliente) WHERE V.Fecha >= DATEADD(YEAR, -1, GETDATE())
-GROUP BY C.ID, C.Nombre, C.Apellido
-HAVING SUM(V.Importe) > 100000
+FROM Clientes C 
+INNER JOIN Ventas V USING(Id_cliente) 
+WHERE V.Fecha >= DATEADD(YEAR, -1, GETDATE()) 
+GROUP BY C.ID, C.Nombre, C.Apellido 
+HAVING SUM(V.Importe) > 100000 
 ORDER BY Total_Compras DESC;
