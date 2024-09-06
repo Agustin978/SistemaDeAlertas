@@ -44,8 +44,10 @@ class SistemaNotificaciones
                 let tema = this.#buscaTemaPorId(temaId);
                 if(tema)
                 {
-                    tema.suscribirUsuario(usuario);
-                    return 200;
+                    if(tema.suscribirUsuario(usuario))
+                    {
+                        return 200;
+                    }
                 }else
                 {
                     throw new Error(`El usuario ${usuario.getNombre()} no se puede suscribir al tema, ya que el tema no esta registrado en el sistema.'`)
