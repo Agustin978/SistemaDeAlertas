@@ -19,6 +19,11 @@ const tema8 = sistema.registrarTema('T8');
 
 //Suscripcion de usuario a tema
 sistema.suscribeUsuarioEnTema(usuario1.id, tema1.id);
+sistema.suscribeUsuarioEnTema(usuario2.id, tema1.id);
+sistema.suscribeUsuarioEnTema(usuario3.id, tema1.id);
+sistema.suscribeUsuarioEnTema(usuario1.id, tema2.id);
+
+//sistema.suscribeUsuarioEnTema(usuario1.id, tema1.id);
 /*
 sistema.suscribeUsuarioEnTema(usuario1.id, tema2.id);
 sistema.suscribeUsuarioEnTema(usuario1.id, tema3.id);
@@ -33,7 +38,7 @@ sistema.suscribeUsuarioEnTema(usuario2.id, tema5.id);
 sistema.suscribeUsuarioEnTema(usuario2.id, tema1.id);
 sistema.suscribeUsuarioEnTema(usuario3.id, tema1.id);
 */
-sistema.suscribeUsuarioEnTema(usuario1.id, tema1.id);
+//sistema.suscribeUsuarioEnTema(usuario1.id, tema1.id);
 
 
 
@@ -42,6 +47,11 @@ const fechaExpira = new Date(Date.now() + 1000 * 60 * 60);
 const fechaExpirada = new Date(Date.now() - 1000 * 60 * 60 * 24); //Fecha retrasada por un dia
 
 //Envio de alertas
+const alerta1 = sistema.enviarAlerta('Informativa','I1',fechaExpira,tema1.id,usuario1.id);
+const alerta2 = sistema.enviarAlerta('Informativa', 'I1', fechaExpirada, tema1.id, usuario2.id);
+const alerta3 = sistema.enviarAlerta('Urgente', 'U1', fechaExpira, tema1.id, usuario3.id); 
+const alerta4 = sistema.enviarAlerta('Urgente', 'U2', fechaExpira, tema2.id);
+/*
 const alerta1 = sistema.enviarAlerta('Informativa','I1',fechaExpira,tema1.id,usuario1.id); //Alerta particular a un usuario
 const alerta2 = sistema.enviarAlerta('Informativa','I2',fechaExpira,tema2.id,usuario1.id);
 const alerta3 = sistema.enviarAlerta('Urgente','U1',fechaExpira,tema3.id); //Alerta para todos los usuarios
@@ -50,10 +60,10 @@ const alerta5 = sistema.enviarAlerta('Urgente','U2',fechaExpira,tema5.id,usuario
 const alerta6 = sistema.enviarAlerta('Informativa','I4',fechaExpira,tema6.id,usuario1.id);
 const alerta7 = sistema.enviarAlerta('Informativa','I5',fechaExpira,tema5.id,usuario1.id);
 const alerta8 = sistema.enviarAlerta('Informativa','I6',fechaExpira,tema1.id,usuario1.id);
-
+*/
 //Creacion de alertas de un tema para determinar el punto 10
-sistema.enviarAlerta('Informativa','I1',fechaExpira,tema1.id); //Alerta para todos los usuarios suscriptos a tema1 
-sistema.enviarAlerta('Urgente','I1',fechaExpira,tema1.id, usuario2.id);
+//sistema.enviarAlerta('Informativa','I1',fechaExpira,tema1.id); //Alerta para todos los usuarios suscriptos a tema1 
+//sistema.enviarAlerta('Urgente','I1',fechaExpira,tema1.id, usuario2.id);
 //Alerta que se manda a todos los usuarios que se suscriban al tema
 /*
 const alerta2 = sistema.enviarAlerta('Urgente','U1',fechaExpira, tema2.id);
