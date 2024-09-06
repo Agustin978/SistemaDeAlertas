@@ -20,6 +20,7 @@ class Tema
             if(!this.observers.includes(usuario))
             {
                 this.observers.push(usuario);
+                return true;
             }else
             {
                 throw new Error(`El usuario ${usuario.getNombre()} ya se encuentra suscripto al tema ${this.titulo}`);
