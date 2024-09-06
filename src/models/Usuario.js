@@ -12,21 +12,6 @@ class Usuario
     }
 
     getNombre(){return this.nombre;}
-    /*
-    suscribeATema(tema){
-        if(!this.temasSuscrito.includes(tema))
-        {
-            this.temasSuscrito.push(tema);
-        }else
-        {
-            console.error('El usuario ',this.nombre,' ya se encuentra suscripto en este tema (',tema.titulo,')');
-        }
-    }
-
-    verificaSuscripcionATema(tema)
-    {
-        return this.temasSuscrito.includes(tema);
-    }*/
 
     #recibirAlerta(alerta)
     {
@@ -45,7 +30,7 @@ class Usuario
         {
             this.alertasYaLeidas.push(alerta);
         }
-        alerta.marcaComoLeida(); //Cambia el estado de la alerta a 'leida'
+        alerta.marcaComoLeida();
     }
 
     obtenerAlertasNoLeidas()
@@ -60,10 +45,7 @@ class Usuario
 
     buscarAlertasPorTema(temaId)
     {
-        //Combino alertas leidas con no leidas
         let alertas = [...this.alertasNoLeidas, ...this.alertasYaLeidas];
-
-        //Filtrado de alertas por id del tema y por expiracion de alerta
         let alertasFiltradas = alertas.filter(alerta => alerta.temaID === temaId && !alerta.estaExpirada());
         return alertasFiltradas;
     }
@@ -92,17 +74,17 @@ class Usuario
         {
             if(alertaGuardada.estaExpirada())
             {
-                this.#eliminarAlerta(alertaGuardada.id); //Se elimina la alerta repetida que esta expirada
+                this.#eliminarAlerta(alertaGuardada.id);
                 return false;
             }else if(alertaGuardada.prioridad === alertaNueva.prioridad)
             {
-                return true; //Entonces la alerta se estaria repitiendo
+                return true;
             }else if(alertaGuardada.prioridad > alertaNueva.prioridad)
             {
-                return true; //Si ya existe una alerta con alta prioridad sobre un tema
+                return true;
             }else
             {
-                this.#eliminarAlerta(alertaGuardada.id); //Se elimina la alerta almacenada ya que tiene menor prioridad que la entrante.
+                this.#eliminarAlerta(alertaGuardada.id);
                 return false;
             }
         }else
