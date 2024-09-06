@@ -188,3 +188,56 @@ describe('SistemaNotificaciones - Enviar alerta a uno o a todos los usuarios sus
     });
 });
 
+describe('SistemaNotificaciones - Obtener las alertas no leidas por un usuario.', () => {
+    let sistema;
+    beforeEach(() => {
+        sistema = new SistemaNotificaciones();
+    });
+
+    test('Se deben obtener las alertas no leidas de un usuario mostrando primero las urgentes (con orden LIFO) y luego las informativas (con orden FIFO).', () => {
+        //Se registra un usuario
+        const usuario = sistema.registrarUsuario('Usuario1', '1234');
+        //Registro temas
+        const tema1 = sistema.registrarTema('T1');
+        const tema2 = sistema.registrarTema('T2');
+        const tema3 = sistema.registrarTema('T3');
+        const tema4 = sistema.registrarTema('T4');
+        const tema5 = sistema.registrarTema('T5');
+        const tema6 = sistema.registrarTema('T6');
+        const tema7 = sistema.registrarTema('T7');
+        //Suscribo al usuario al tema
+        sistema.suscribeUsuarioEnTema(usuario.id, tema1.id);
+        sistema.suscribeUsuarioEnTema(usuario.id, tema2.id);
+        sistema.suscribeUsuarioEnTema(usuario.id, tema3.id);
+        sistema.suscribeUsuarioEnTema(usuario.id, tema4.id);
+        sistema.suscribeUsuarioEnTema(usuario.id, tema5.id);
+        sistema.suscribeUsuarioEnTema(usuario.id, tema6.id);
+        sistema.suscribeUsuarioEnTema(usuario.id, tema7.id);
+        //Creo las alertas de cada tema
+        const fechaExpira = new Date(Date.now() + 1000 * 60 * 60);
+        const alerta1 = sistema.enviarAlerta('Informativa','I1',fechaExpira,tema1.id);
+        const alerta2 = sistema.enviarAlerta('Informativa','I2',fechaExpira,tema2.id);
+        const alerta3 = sistema.enviarAlerta('Urgente','U1',fechaExpira,tema3.id);
+        const alerta4 = sistema.enviarAlerta('Urgente', 'U2', fechaExpira, tema7.id);
+        const alerta5 = sistema.enviarAlerta('Informativa','I3',fechaExpira,tema4.id);
+        const alerta6 = sistema.enviarAlerta('Urgente','U3',fechaExpira,tema5.id);
+        const alerta7 = sistema.enviarAlerta('Informativa','I4',fechaExpira,tema6.id);
+
+        //Marco la alerta 4 como leida
+        sistema.marcarAlertaComoLeida(usuario.id, alerta4.id);
+        //Obtengo las alertas no leidas por el usuario
+        const alertasNoLeidas = sistema.ObtenerAlertasNoLeidasDeUsuario(usuario.id);
+
+        //Verifico que solo se obtengan las alertas no leidas
+        expect(alertasNoLeidas).not.toContain(alerta4);
+        expect(alertasNoLeidas.length).toBe(6);
+
+        //Controlo como me retorno el orden del arreglo de alertas no leidas y que las mismas no esten expiradas
+        expect(alertasNoLeidas[0]).toBe(alerta6) && expect(alertasNoLeidas[0].estaExpirada()).toBe(false);
+        expect(alertasNoLeidas[1]).toBe(alerta3) && expect(alertasNoLeidas[1].estaExpirada()).toBe(false);
+        expect(alertasNoLeidas[2]).toBe(alerta1) && expect(alertasNoLeidas[2].estaExpirada()).toBe(false);
+        expect(alertasNoLeidas[3]).toBe(alerta2) && expect(alertasNoLeidas[3].estaExpirada()).toBe(false);
+        expect(alertasNoLeidas[4]).toBe(alerta5) && expect(alertasNoLeidas[4].estaExpirada()).toBe(false);
+        expect(alertasNoLeidas[5]).toBe(alerta7) && expect(alertasNoLeidas[5].estaExpirada()).toBe(false);
+    })
+});
