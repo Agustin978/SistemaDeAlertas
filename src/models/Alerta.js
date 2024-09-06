@@ -1,18 +1,15 @@
 class Alerta
 {
     static #idCounter = 1;
-    static TIPO_INFORMATIVA = 'Informativa';
-    static TIPO_URGENTE = 'Urgente';
 
-    constructor(tipo, mensaje, fechaExpira, paraTodos = false, usuarioParticular = null, temaID)
+    constructor(mensaje, fechaExpira, paraTodos = false, usuarioParticular = null, temaID)
     {
         this.id = Alerta.#idCounter++;
-        this.tipo = tipo;
         this.mensaje = mensaje;
         this.fechaExpira = fechaExpira;
+        this.temaID = temaID;
         this.paraTodos = paraTodos;
         this.usuarioParticular = usuarioParticular;
-        this.temaID = temaID;
         this.leida = false;
     }
 
@@ -24,6 +21,19 @@ class Alerta
     {
         this.leida = true;
     }
+    prioridad()
+    {
+        return 0;
+    }
 }
 
-module.exports = Alerta;
+class AlertaInformativa extends Alerta
+{
+    prioridad(){return 1;}
+}
+
+class AlertaUrgente extends Alerta
+{
+    prioridad(){return 2;}
+}
+module.exports = {Alerta, AlertaInformativa, AlertaUrgente};

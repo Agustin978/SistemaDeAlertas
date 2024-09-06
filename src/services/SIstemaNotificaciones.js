@@ -8,7 +8,6 @@ class SistemaNotificaciones
     {
         this.usuarios = [];
         this.temas = [];
-        this.alertas = [];
     }
 
     registrarUsuario(nombre, password)
@@ -25,114 +24,198 @@ class SistemaNotificaciones
         return tema;
     }
 
+    #buscaUsuarioPorID(usuarioId)
+    {
+        return this.usuarios.find(user => user.id == usuarioId);
+    }
+
+    #buscaTemaPorId(temaId)
+    {
+        return this.temas.find(tem => tem.id == temaId);
+    }
+
+    suscribeUsuarioEnTema(usuarioId, temaId)
+    {
+        try
+        {
+            let usuario = this.#buscaUsuarioPorID(usuarioId);
+            if(usuario)
+            {
+                let tema = this.#buscaTemaPorId(temaId);
+                if(tema)
+                {
+                    if(tema.suscribirUsuario(usuario))
+                    {
+                        return 200;
+                    }
+                }else
+                {
+                    throw new Error(`El usuario ${usuario.getNombre()} no se puede suscribir al tema, ya que el tema no esta registrado en el sistema.'`)
+                }
+            }else
+            {
+                throw new Error(`No se puede realizar la suscripcion en el tema ya que el usuario no se encuentra registrado.`)
+            }
+        }catch(error)
+        {
+            console.log(error.message);
+        }
+    }
+
     enviarAlerta(tipo, mensaje, fechaExpira, temaId, usuarioId = null)
     {
         try
         {
-            const tema = this.temas.find(tem => tem.id == temaId);
+            const tema = this.#buscaTemaPorId(temaId);
             //Para el caso que se ingrese el id de un tema no registrado
             if(!tema)
             {
-                console.error('Error: El tema con ID ',temaId,' no existe. No se puede crear la alerta.');
+                throw new Error(`Error: El tema con ID ${temaId} no existe. No se puede crear la alerta.`);
             }
-            const alerta = new Alerta(tipo, mensaje, fechaExpira, usuarioId === null, usuarioId, temaId);
-            this.alertas.push(alerta);
+            //const alerta = new Alerta(tipo, mensaje, fechaExpira, usuarioId === null, usuarioId, temaId);
+            //Se crea el tema segun el nivel de importancia
+            let alerta;
+            if(tipo === 'Urgente')
+            {
+                alerta = new Alerta.AlertaUrgente(mensaje, fechaExpira, usuarioId === null, usuarioId, temaId);
+            }else
+            {
+                alerta = new Alerta.AlertaInformativa(mensaje, fechaExpira, usuarioId === null, usuarioId, temaId);
+            }
+
             if(usuarioId === null)
+            {
+                tema.notificar(alerta);
+            }else
+            {
+                const usuario = this.#buscaUsuarioPorID(usuarioId);
+                //Para el caso en que el id del usuario no se encuentre registrado o el mismo no este suscripto al tema.
+                if( usuario && tema.verificaUsuarioSuscrito(usuario))
                 {
-                    this.usuarios.forEach(usuario =>{
-                        if(usuario.verificaSuscripcionATema(tema))
-                        {
-                            usuario.recibirAlerta(alerta);
-                        }
-                    });
+                    usuario.update(alerta);
                 }else
                 {
-                    const usuario = this.usuarios.find(user => user.id == usuarioId);
-                    //Para el caso en que el id del usuario no se encuentre registrado o el mismo no este suscripto al tema.
-                    if( usuario && usuario.verificaSuscripcionATema(tema))
-                    {
-                        usuario.recibirAlerta(alerta);
-                    }else
-                    {
-                        console.error('El usuario no se encuetra registrado o el mismo no esta suscripto al tema');
-                        return;
-                    }
-                }        
-                return alerta;
+                    throw new Error(`El usuario no se encuetra registrado o el mismo no esta suscripto al tema ${tema.obtenerTitulo()}`);
+                }
+            }        
+            return alerta;
         }catch(error)
         {
-            console.error(error);
+            console.error(error.message);
         }
     }
 
-    ordenarAlertas(alertas)
+    #ordenarAlertas(alertas)
     {
+        //Separamos las alertas urgentes de las informativas
+        let urgentes = alertas.filter(a => a.prioridad() == 2);
+        let informativas = alertas.filter(a => a.prioridad() != 2);
+        //Ordenamiento
+        urgentes.sort((a,b)=>b.id-a.id);
+        informativas.sort((a,b)=>a.id-b.id);
+        return [...urgentes, ...informativas];
+/*
         return alertas.sort((a,b) => {
-            if(a.tipo === Alerta.TIPO_URGENTE && b.tipo !== Alerta.TIPO_URGENTE){
+            if(a.prioridad === 2 && b.prioridad !== 2){
                 return -1; //a es urgente sin embargo b no => a va antes
-            }else if(a.tipo !== Alerta.TIPO_URGENTE && b.tipo === Alerta.TIPO_URGENTE)
+            }else if(a.prioridad !== 2 && b.prioridad === 2)
             {
                 return 1; //a no es urgente sin embargo b si => b va antes
             }
             return b.id - a.id; //Para temas urgentes, se utiliza el orden LIFO (Last in, First out)
                                 //Para temas informativos, se utiliza el orden FIFO (Fist in, First out)
-        });
+        });*/
     }
     
     //Alertas no leidas del usuario y no expiradas.
     ObtenerAlertasNoLeidasDeUsuario(usuarioId)
     {
-        const usuario = this.usuarios.find(user => user.id === usuarioId);
-        if(usuario)
+        try
         {
-            return this.ordenarAlertas(usuario.obtenerAlertasNoLeidas().filter(alerta => !alerta.estaExpirada()));
-        }else
+            const usuario = this.#buscaUsuarioPorID(usuarioId);
+            if(usuario)
+            {
+                return this.#ordenarAlertas(usuario.obtenerAlertasNoLeidas().filter(alerta => !alerta.estaExpirada()));
+            }else
+            {
+                throw new Error('El usuario no fue encontrado.');
+            }
+        }catch(error)
         {
-            console.error('El usuario no fue encontrado.');
-            return;
+            console.log(error.message);
         }
     }
 
     ObtenerAlertasNoExpiradasDeTema(temaId)
     {
+        try
+        {
+            let tema = this.#buscaTemaPorId(temaId);
+            if(tema)
+            {
+                let alertasNoExpiradas = [];
+                tema.observers.forEach(usuario => {
+                    let alertasUsuario = usuario.buscarAlertasPorTema(temaId);
+                    alertasNoExpiradas = [...alertasNoExpiradas, ...alertasUsuario];
+                });
+                return this.#ordenarAlertas(alertasNoExpiradas);
+            }else
+            {
+                throw new Error('El tema del que se estan buscando alertas no existe.')
+            }
+        }catch(error)
+        {
+            console.log(error.message);
+        }
+        /*
         const alertasNoExpiradas = this.alertas.filter(alerta =>  
             !alerta.estaExpirada() && 
             alerta.paraTodos &&
             alerta.temaID === temaId
-        );
-        return this.ordenarAlertas(alertasNoExpiradas);
+        );*/
     }
 
     marcarAlertaComoLeida(usuarioId, alertaId)
     {
-        const usuario = this.usuarios.find(user => user.id === usuarioId);
-        if(usuario)
+        try
         {
-            const alertaNoLeida = usuario.obtenerAlertasNoLeidas().find(al=>al.id ===alertaId);
-            if(alertaNoLeida)
+            const usuario = this.#buscaUsuarioPorID(usuarioId);
+            if(usuario)
             {
-                usuario.alertaLeida(alertaNoLeida); //Muevo la alerta a alerta leida
-                console.log('La alerta ',alertaNoLeida.mensaje,' con id ',alertaNoLeida.id,' se marco como leida, para el ususario ',usuario.getNombre());
+                const alertaNoLeida = usuario.obtenerAlertasNoLeidas().find(al=>al.id===alertaId);
+                if(alertaNoLeida)
+                {
+                    usuario.alertaLeida(alertaNoLeida); //Muevo la alerta a alerta leida
+                    console.log('La alerta ',alertaNoLeida.mensaje,' con id ',alertaNoLeida.id,' se marco como leida, para el ususario ',usuario.getNombre());
+                }else
+                {
+                    throw new Error('La alerta no fue encontrada o ya fue leída.');
+                }
             }else
             {
-                console.error('La alerta no fue encontrada o ya fue leída.');
+                throw new Error('El usuario no fue encontrado.');
             }
-        }else
+        }catch(error)
         {
-            console.error('El usuario no fue encontrado.');
+            console.log(error.message);
         }
     }
 
     ObtenerAlertasLeidasPorUsuario(usuarioId)
     {
-        const usuario = this.usuarios.find(user => user.id === usuarioId);
-        if(usuario)
+        try
         {
-            return this.ordenarAlertas(usuario.obtenerAlertasYaLeidas());
-        }else
+            const usuario = this.#buscaUsuarioPorID(usuarioId);
+            if(usuario)
+            {
+                return this.#ordenarAlertas(usuario.obtenerAlertasYaLeidas());
+            }else
+            {
+                throw new Error('El usuario no fue encontrado.');
+            }
+        }catch(error)
         {
-            console.error('El usuario no fue encontrado.');
-            return;
+            console.log(error.message);
         }
     }
 }
