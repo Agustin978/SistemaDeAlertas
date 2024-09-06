@@ -188,7 +188,7 @@ describe('SistemaNotificaciones - Enviar alerta a uno o a todos los usuarios sus
     });
 });
 
-describe('SistemaNotificaciones - Obtener las alertas no leidas por un usuario.', () => {
+describe('SistemaNotificaciones - Obtener las alertas no expiradas y no leidas por un usuario.', () => {
     let sistema;
     beforeEach(() => {
         sistema = new SistemaNotificaciones();
@@ -241,3 +241,68 @@ describe('SistemaNotificaciones - Obtener las alertas no leidas por un usuario.'
         expect(alertasNoLeidas[5]).toBe(alerta7) && expect(alertasNoLeidas[5].estaExpirada()).toBe(false);
     })
 });
+
+describe('SistemaNotificaciones - Obtener las alertas no expiradas de un tema.', () => {
+    let sistema;
+    let usuario1, usuario2, usuario3, usuario4, usuario5;
+    let tema1, tema2;
+    beforeEach(() => {
+        sistema = new SistemaNotificaciones();
+        //Registro los usuarios
+        usuario1 = sistema.registrarUsuario('Usuario1', '1234');
+        usuario2 = sistema.registrarUsuario('Usuario2', '1234');
+        usuario3 = sistema.registrarUsuario('Usuario3', '1234');
+        usuario4 = sistema.registrarUsuario('Usuario4', '1234');
+        usuario5 = sistema.registrarUsuario('Usuario5', '1234');
+        //Registro los temas
+        tema1 = sistema.registrarTema('Titulo tema 1');
+        tema2 = sistema.registrarTema('Titulo tema 2');
+        //Suscribo a los usuarios a los respectivos temas
+        sistema.suscribeUsuarioEnTema(usuario1.id, tema1.id);
+        sistema.suscribeUsuarioEnTema(usuario2.id, tema1.id);
+        sistema.suscribeUsuarioEnTema(usuario3.id, tema1.id);
+        sistema.suscribeUsuarioEnTema(usuario4.id, tema1.id);
+        sistema.suscribeUsuarioEnTema(usuario5.id, tema1.id);
+        sistema.suscribeUsuarioEnTema(usuario1.id, tema2.id);
+    });
+
+    test('Debe retornar todas las alertas no expiradas en el orden correcto.', () => {
+        const fechaExpira = new Date(Date.now() + 1000 * 60 * 60); //Expira en 1 hora
+        const fechaExpirada = new Date(Date.now() - 1000 * 60 * 60 * 24); //Expirada hace 1 dia
+
+        //Envio de alertas
+        sistema.enviarAlerta('Urgente', 'U1', fechaExpira, tema1.id, usuario1.id);
+        sistema.enviarAlerta('Informativa', 'I1', fechaExpira, tema1.id, usuario2.id);
+        sistema.enviarAlerta('Informativa', 'I2', fechaExpirada, tema1.id, usuario3.id);
+        sistema.enviarAlerta('Urgente', 'U2', fechaExpira, tema1.id, usuario4.id);
+        sistema.enviarAlerta('Informativa', 'I3', fechaExpira, tema1.id, usuario5.id);
+        sistema.enviarAlerta('Informativa', 'I4', fechaExpira, tema2.id);
+
+        //Obtendremos las alertas no expiradas
+        const alertas = sistema.ObtenerAlertasNoExpiradasDeTema(tema1.id);
+        const alertas2 = sistema.ObtenerAlertasNoExpiradasDeTema(tema2.id);
+        //Verificamos longitud del arreglo
+        expect(alertas.length).toBe(4); //Ya que ingresamos una alerta expirada
+        expect(alertas2.length).toBe(1);
+        //Verifico el correcto ordenamiento de las alertas
+        expect(alertas[0].mensaje).toBe('U2');
+        expect(alertas[1].mensaje).toBe('U1');
+        expect(alertas[2].mensaje).toBe('I1');
+        expect(alertas[3].mensaje).toBe('I3');
+        //Verifico en el tema2 tambien
+        expect(alertas2[0].mensaje).toBe('I4');
+        //Verificamos si las alertas muestran que son particulares o para todos
+        expect(alertas[0].usuarioParticular).toBe(usuario4.id) && expect(alertas[0].paraTodos).toBe(false);
+        expect(alertas[1].usuarioParticular).toBe(usuario1.id) && expect(alertas[1].paraTodos).toBe(false);
+        expect(alertas[2].usuarioParticular).toBe(usuario2.id) && expect(alertas[2].paraTodos).toBe(false);
+        expect(alertas[3].usuarioParticular).toBe(usuario5.id) && expect(alertas[3].paraTodos).toBe(false);
+        //Ahora para el tema2
+        expect(alertas2[0].usuarioParticular).toBe(null) && expect(alertas2[0].paraTodos).toBe(true);
+    });
+
+    test('Debe manejar correctamente el error en caso que el tema del que se quiere obtener la alerta no exista', () => {
+        const alerta = sistema.ObtenerAlertasNoExpiradasDeTema(999);
+        expect(alerta).toBeUndefined();
+    });
+
+})
